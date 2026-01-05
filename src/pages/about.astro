@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import NewsletterForm from '../components/NewsletterForm.astro';
+
+const description = 'About me - learn more about who I am and what I do.';
+---
+
+<BaseLayout title="About | Bhavik Maneck" description={description}>
+  <article class="prose">
+    <h1>About Me</h1>
+
+    <p>
+      Hello! I'm <strong>Bhavik Maneck</strong>, a Senior Data Scientist at Microsoft.
+    </p>
+
+    <!-- Add your profile image to public/images/ -->
+    <!-- <img src="/images/profile.jpg" alt="Bhavik Maneck" class="w-32 h-32 rounded-full mb-6" /> -->
+
+    <h2>Get in Touch</h2>
+
+    <p>
+      Feel free to reach out if you'd like to connect. You can find me on:
+    </p>
+
+    <ul>
+      <li><a href="https://github.com/bhavikm">GitHub</a></li>
+      <li><a href="https://www.linkedin.com/in/bhavik-maneck/">LinkedIn</a></li>
+    </ul>
+
+    <p>
+      Or subscribe to my newsletter to stay updated:
+    </p>
+  </article>
+
+  <NewsletterForm />
+</BaseLayout>

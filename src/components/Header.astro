@@ -1,0 +1,35 @@
+---
+import ThemeToggle from './ThemeToggle.astro';
+
+const navLinks = [
+  { href: '/', label: 'Home' },
+  { href: '/about', label: 'About' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<header class="border-b border-gray-200 dark:border-gray-800">
+  <nav class="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
+    <a href="/" class="font-semibold text-lg hover:no-underline text-gray-900 dark:text-gray-100">
+      Bhavik Maneck
+    </a>
+
+    <div class="flex items-center gap-6">
+      {navLinks.map((link) => (
+        <a
+          href={link.href}
+          class:list={[
+            'text-sm transition-colors hover:text-accent dark:hover:text-accent-dark',
+            currentPath === link.href
+              ? 'text-accent dark:text-accent-dark'
+              : 'text-gray-600 dark:text-gray-400',
+          ]}
+        >
+          {link.label}
+        </a>
+      ))}
+      <ThemeToggle />
+    </div>
+  </nav>
+</header>

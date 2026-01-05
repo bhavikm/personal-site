@@ -1,0 +1,26 @@
+---
+import { type CollectionEntry, getCollection } from 'astro:content';
+import BlogPostLayout from '../../layouts/BlogPostLayout.astro';
+import NewsletterForm from '../../components/NewsletterForm.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: post,
+  }));
+}
+
+type Props = CollectionEntry<'blog'>;
+
+const post = Astro.props;
+const { Content } = await post.render();
+---
+
+<BlogPostLayout post={post}>
+  <Content />
+  <NewsletterForm
+    title="Enjoyed this post?"
+    description="Subscribe to get notified when I publish new articles."
+  />
+</BlogPostLayout>
