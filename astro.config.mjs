@@ -4,5 +4,5 @@ import tailwind from '@astrojs/tailwind';
 // https://astro.build/config
 export default defineConfig({
   integrations: [tailwind()],
-  site: 'https://example.com', // Update with your actual domain
+  site: 'https://bhavikmaneck.com', // Update with your actual domain
 });
