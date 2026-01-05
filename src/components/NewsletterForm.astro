@@ -6,12 +6,13 @@ interface Props {
 
 const {
   title = 'Subscribe to my newsletter',
-  description = 'Get notified when I publish new posts. No spam, unsubscribe anytime.',
+  description = 'I only publish my best posts to my newsletter.',
 } = Astro.props;
 
-// Replace with your ConvertKit form action URL
-// You can find this in ConvertKit > Forms > [Your Form] > Embed
-const CONVERTKIT_FORM_ACTION = 'https://app.kit.com/forms/8940049/subscriptions';
+const DEFAULT_CONVERTKIT_FORM_ACTION = 'https://app.kit.com/forms/8940049/subscriptions';
+// Optional: set `PUBLIC_CONVERTKIT_FORM_ACTION` to override without editing code.
+const CONVERTKIT_FORM_ACTION =
+  import.meta.env.PUBLIC_CONVERTKIT_FORM_ACTION ?? DEFAULT_CONVERTKIT_FORM_ACTION;
 ---
 
 <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 mt-8">
@@ -19,13 +20,15 @@ const CONVERTKIT_FORM_ACTION = 'https://app.kit.com/forms/8940049/subscriptions'
   <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">{description}</p>
 
   <form
+    data-newsletter-form="convertkit"
     action={CONVERTKIT_FORM_ACTION}
     method="post"
-    class="flex flex-col sm:flex-row gap-3"
+    class="flex flex-col sm:flex-row sm:flex-wrap gap-3"
   >
     <input
       type="email"
       name="email_address"
+      autocomplete="email"
       placeholder="your@email.com"
       required
       class="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent dark:focus:ring-accent-dark"
@@ -36,6 +39,13 @@ const CONVERTKIT_FORM_ACTION = 'https://app.kit.com/forms/8940049/subscriptions'
     >
       Subscribe
     </button>
+
+    <p
+      data-newsletter-status
+      class="mt-3 text-sm sm:basis-full"
+      aria-live="polite"
+      hidden
+    ></p>
   </form>
 
   <p class="text-xs text-gray-500 dark:text-gray-500 mt-3">
@@ -43,11 +53,89 @@ const CONVERTKIT_FORM_ACTION = 'https://app.kit.com/forms/8940049/subscriptions'
   </p>
 </div>
 
+<script is:inline>
+  (() => {
+    const forms = document.querySelectorAll('form[data-newsletter-form="convertkit"]');
+
+    for (const form of forms) {
+      if (!(form instanceof HTMLFormElement)) continue;
+
+      const statusElement = form.querySelector('[data-newsletter-status]');
+      const emailInput = form.querySelector('input[name="email_address"]');
+      const submitButton = form.querySelector('button[type="submit"]');
+
+      if (
+        !(statusElement instanceof HTMLElement) ||
+        !(emailInput instanceof HTMLInputElement) ||
+        !(submitButton instanceof HTMLButtonElement)
+      ) {
+        continue;
+      }
+
+      let isSubmitting = false;
+
+      const setStatus = (message, state) => {
+        statusElement.textContent = message;
+        statusElement.hidden = !message;
+
+        statusElement.classList.remove(
+          'text-gray-600',
+          'dark:text-gray-400',
+          'text-green-700',
+          'dark:text-green-400',
+          'text-red-700',
+          'dark:text-red-400',
+        );
+
+        if (state === 'success') {
+          statusElement.classList.add('text-green-700', 'dark:text-green-400');
+        } else if (state === 'error') {
+          statusElement.classList.add('text-red-700', 'dark:text-red-400');
+        } else {
+          statusElement.classList.add('text-gray-600', 'dark:text-gray-400');
+        }
+      };
+
+      form.addEventListener('submit', async (event) => {
+        if (isSubmitting) return;
+        isSubmitting = true;
+
+        event.preventDefault();
+        setStatus('Subscribing…', 'loading');
+        submitButton.disabled = true;
+        emailInput.disabled = true;
+
+        try {
+          const formData = new FormData(form);
+          const body = new URLSearchParams();
+
+          for (const [key, value] of formData.entries()) {
+            if (typeof value === 'string') body.append(key, value);
+          }
+
+          await fetch(form.action, { method: 'POST', mode: 'no-cors', body });
+
+          setStatus("Success! Now check your email to confirm your subscription.", 'success');
+          form.reset();
+        } catch {
+          setStatus('Something went wrong. Please try again.', 'error');
+        } finally {
+          submitButton.disabled = false;
+          emailInput.disabled = false;
+          isSubmitting = false;
+        }
+      });
+    }
+  })();
+</script>
+
 <!--
   SETUP INSTRUCTIONS:
   1. Create a ConvertKit account at https://convertkit.com (free up to 10k subscribers)
   2. Create a new Form in ConvertKit
   3. Go to Forms > [Your Form] > Embed
-  4. Copy the form action URL and replace CONVERTKIT_FORM_ACTION above
+  4. Copy the form action URL and either:
+     - set `PUBLIC_CONVERTKIT_FORM_ACTION` (recommended), or
+     - replace DEFAULT_CONVERTKIT_FORM_ACTION above
   5. The action URL looks like: https://app.convertkit.com/forms/1234567/subscriptions
 -->

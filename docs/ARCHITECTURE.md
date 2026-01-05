@@ -59,11 +59,12 @@ Defined in `src/content/config.ts`:
 
 ## Newsletter: ConvertKit
 
-ConvertKit is integrated via a simple HTML form:
+ConvertKit (Kit) is integrated via a simple HTML form with progressive enhancement:
 
 1. Create a form in ConvertKit dashboard
-2. Use the form action URL in `NewsletterForm.astro`
-3. Form submits directly to ConvertKit (no backend needed)
+2. Set `PUBLIC_CONVERTKIT_FORM_ACTION` (or edit `src/components/NewsletterForm.astro`)
+3. With JS enabled, the form submits in the background and shows an inline success message (no redirect)
+4. Without JS, the form falls back to a normal POST + ConvertKit redirect
 
 ## Hosting: Netlify
 
