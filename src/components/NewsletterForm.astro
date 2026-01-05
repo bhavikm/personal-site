@@ -103,7 +103,6 @@ const CONVERTKIT_FORM_ACTION =
         event.preventDefault();
         setStatus('Subscribing…', 'loading');
         submitButton.disabled = true;
-        emailInput.disabled = true;
 
         try {
           const formData = new FormData(form);
@@ -113,15 +112,16 @@ const CONVERTKIT_FORM_ACTION =
             if (typeof value === 'string') body.append(key, value);
           }
 
+          emailInput.readOnly = true;
           await fetch(form.action, { method: 'POST', mode: 'no-cors', body });
 
-          setStatus("Success! Now check your email to confirm your subscription.", 'success');
+          setStatus('Thanks! Check your inbox to confirm.', 'success');
           form.reset();
         } catch {
           setStatus('Something went wrong. Please try again.', 'error');
         } finally {
           submitButton.disabled = false;
-          emailInput.disabled = false;
+          emailInput.readOnly = false;
           isSubmitting = false;
         }
       });
